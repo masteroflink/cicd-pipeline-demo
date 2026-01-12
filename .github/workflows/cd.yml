@@ -61,17 +61,29 @@ jobs:
           docker stop smoke-test
           docker rm smoke-test
 
+  deploy-production:
+    name: Deploy to Production (Render)
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    environment: production
+    steps:
+      - name: Deploy to Render
+        run: |
+          echo "Deploying to production on Render..."
+          curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+          echo "Production deployment triggered!"
+
   notify:
     name: Notify on Completion
     runs-on: ubuntu-latest
-    needs: deploy-staging
+    needs: [deploy-staging, deploy-production]
     if: always()
     steps:
       - name: Deployment Status
         run: |
-          if [ "${{ needs.deploy-staging.result }}" == "success" ]; then
-            echo "Deployment to staging completed successfully!"
+          if [ "${{ needs.deploy-production.result }}" == "success" ]; then
+            echo "Deployment to production completed successfully!"
           else
-            echo "Deployment to staging failed or was skipped!"
+            echo "Deployment failed or was skipped!"
             exit 1
           fi

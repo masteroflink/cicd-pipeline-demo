@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: cicd-pipeline-demo
+    runtime: docker
+    dockerfilePath: ./docker/Dockerfile
+    dockerContext: .
+    branch: main
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
