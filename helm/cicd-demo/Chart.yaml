@@ -14,3 +14,9 @@ maintainers:
     email: team@example.com
 sources:
   - https://github.com/OWNER/cicd-pipeline-demo
+
+dependencies:
+  - name: postgresql
+    version: "16.4.1"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: postgresql.enabled

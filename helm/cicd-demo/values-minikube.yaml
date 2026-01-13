@@ -1,0 +1,81 @@
+# Minikube local development values
+# Usage: helm install cicd-demo ./helm/cicd-demo -f ./helm/cicd-demo/values-minikube.yaml
+
+replicaCount: 1
+
+image:
+  # Use local image built with: eval $(minikube docker-env) && docker build
+  repository: cicd-demo
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 96Mi  # FastAPI baseline ~60Mi, leave headroom
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  # Lower threshold makes it easier to trigger scaling for testing
+  targetCPUUtilizationPercentage: 50
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    # No SSL redirect for local development
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  hosts:
+    - host: localhost
+      paths:
+        - path: /
+          pathType: Prefix
+  # No TLS for local development
+  tls: []
+
+# Remove pod anti-affinity for single-node Minikube
+affinity: {}
+
+config:
+  environment: development
+  logLevel: DEBUG
+
+# Faster probe timing for local development
+probes:
+  liveness:
+    path: /health
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+  readiness:
+    path: /health
+    initialDelaySeconds: 3
+    periodSeconds: 5
+    timeoutSeconds: 2
+    failureThreshold: 3
+
+# PostgreSQL for local development
+postgresql:
+  enabled: true
+  image:
+    tag: "latest"  # Use latest for local dev
+  auth:
+    username: cicd_demo
+    password: devpassword123
+    database: cicd_demo
+  primary:
+    persistence:
+      enabled: false  # No persistence for local dev (faster startup)
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi

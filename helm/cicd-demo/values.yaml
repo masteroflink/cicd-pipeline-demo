@@ -88,6 +88,21 @@ affinity:
 config:
   environment: production
   logLevel: INFO
+  # External database URL (used when postgresql.enabled is false)
+  databaseUrl: ""
+
+# PostgreSQL subchart configuration
+# For production, use an external managed database and set postgresql.enabled=false
+postgresql:
+  enabled: false
+  auth:
+    username: cicd_demo
+    password: ""  # Set via --set or values file
+    database: cicd_demo
+  primary:
+    persistence:
+      enabled: true
+      size: 1Gi
 
 # Probes configuration
 probes:

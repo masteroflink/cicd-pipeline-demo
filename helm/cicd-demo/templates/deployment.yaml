@@ -51,6 +51,18 @@ spec:
               value: "/app/src"
             - name: PYTHONUNBUFFERED
               value: "1"
+            {{- if .Values.postgresql.enabled }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cicd-demo.fullname" . }}-postgresql
+                  key: password
+            - name: DATABASE_URL
+              value: "postgresql://{{ .Values.postgresql.auth.username }}:$(POSTGRES_PASSWORD)@{{ include "cicd-demo.fullname" . }}-postgresql:5432/{{ .Values.postgresql.auth.database }}"
+            {{- else if .Values.config.databaseUrl }}
+            - name: DATABASE_URL
+              value: {{ .Values.config.databaseUrl | quote }}
+            {{- end }}
           livenessProbe:
             httpGet:
               path: {{ .Values.probes.liveness.path }}

@@ -215,6 +215,7 @@ Triggered on push to `main`:
 - Pulls latest image from ghcr.io
 - Simulates staging deployment
 - Runs smoke tests
+- Sends Slack notifications on success/failure
 
 ### Release Pipeline (`.github/workflows/release.yml`)
 
