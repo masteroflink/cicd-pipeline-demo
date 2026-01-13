@@ -3,6 +3,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.api.health import router as health_router
 from app.api.routes import router as api_router
@@ -35,3 +36,11 @@ app = FastAPI(
 # Include routers
 app.include_router(health_router)
 app.include_router(api_router)
+
+# Prometheus metrics instrumentation
+# This adds automatic metrics for all requests:
+# - http_requests_total (counter)
+# - http_request_duration_seconds (histogram)
+# - http_request_size_bytes (summary)
+# - http_response_size_bytes (summary)
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
