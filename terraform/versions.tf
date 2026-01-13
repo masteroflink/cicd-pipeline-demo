@@ -10,7 +10,7 @@ terraform {
 
   # Store state in Terraform Cloud (free tier)
   cloud {
-    organization = "REPLACE_WITH_YOUR_ORG"
+    organization = "master-of-link"
 
     workspaces {
       name = "cicd-pipeline-demo"
