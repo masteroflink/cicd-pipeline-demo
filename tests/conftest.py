@@ -1,26 +1,40 @@
 """Pytest configuration and shared fixtures."""
 
+import os
+import tempfile
 import pytest
 from collections.abc import AsyncGenerator
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.db.database import Base, get_db
 from app.main import app
 
 
-# Create an in-memory SQLite database for testing (async)
-SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite://"
+# Create a temporary file for SQLite database
+_db_fd, _db_path = tempfile.mkstemp(suffix=".db")
 
-engine = create_async_engine(
-    SQLALCHEMY_DATABASE_URL,
+# Async engine for the actual database operations
+ASYNC_DATABASE_URL = f"sqlite+aiosqlite:///{_db_path}"
+
+async_engine = create_async_engine(
+    ASYNC_DATABASE_URL,
     connect_args={"check_same_thread": False},
 )
 
 TestingSessionLocal = async_sessionmaker(
-    engine,
+    async_engine,
     class_=AsyncSession,
     expire_on_commit=False,
+)
+
+# Sync engine for table creation (TestClient runs in sync context)
+SYNC_DATABASE_URL = f"sqlite:///{_db_path}"
+
+sync_engine = create_engine(
+    SYNC_DATABASE_URL,
+    connect_args={"check_same_thread": False},
 )
 
 
@@ -36,16 +50,18 @@ async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 @pytest.fixture(autouse=True)
-async def setup_test_db():
+def setup_test_db():
     """Create tables before each test and drop after."""
     # Import models to ensure they're registered with Base
     from app.db import models  # noqa: F401
 
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    # Create tables using sync engine
+    Base.metadata.create_all(bind=sync_engine)
+
     yield
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+
+    # Drop tables after test
+    Base.metadata.drop_all(bind=sync_engine)
 
 
 @pytest.fixture
@@ -55,3 +71,12 @@ def client() -> TestClient:
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+
+
+def pytest_sessionfinish(session, exitstatus):
+    """Clean up temporary database file after all tests."""
+    try:
+        os.close(_db_fd)
+        os.unlink(_db_path)
+    except OSError:
+        pass
