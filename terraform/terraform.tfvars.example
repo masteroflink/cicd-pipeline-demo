@@ -1,8 +1,9 @@
 # Example Terraform variables file
 # Copy to terraform.tfvars and fill in your values
 
-# Render owner ID (find in Render dashboard URL or API)
-owner_id = "YOUR_RENDER_OWNER_ID"
+# Render owner ID should be set via environment variable TF_VAR_owner_id
+# or RENDER_OWNER_ID for security (find in Render dashboard URL or API)
+# owner_id = "YOUR_RENDER_OWNER_ID"
 
 # Service configuration
 service_name = "cicd-pipeline-demo"

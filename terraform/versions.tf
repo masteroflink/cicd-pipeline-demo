@@ -20,4 +20,6 @@ terraform {
 
 provider "render" {
   # API key is read from RENDER_API_KEY environment variable
+  # Owner ID is read from RENDER_OWNER_ID environment variable
+  owner_id = var.owner_id
 }

@@ -4,11 +4,9 @@
 # that hosts the FastAPI application.
 
 resource "render_web_service" "api" {
-  name        = var.service_name
-  region      = var.region
-  plan        = "free"
-  owner_id    = var.owner_id
-  auto_deploy = true
+  name   = var.service_name
+  region = var.region
+  plan   = "starter"
 
   runtime_source = {
     docker = {
@@ -16,6 +14,7 @@ resource "render_web_service" "api" {
       branch          = "main"
       dockerfile_path = "docker/Dockerfile"
       context         = "."
+      auto_deploy     = true
     }
   }
 
@@ -34,15 +33,4 @@ resource "render_web_service" "api" {
   health_check_path = "/health"
 
   # Note: Some features like custom domains require paid plans
-}
-
-# Output the service URL
-output "service_url" {
-  description = "URL of the deployed service"
-  value       = render_web_service.api.url
-}
-
-output "service_id" {
-  description = "Render service ID"
-  value       = render_web_service.api.id
 }
