@@ -55,7 +55,9 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Dependency to get database session."""
     session_factory = _get_session_factory()
     if session_factory is None:
-        raise RuntimeError("Database not configured. Set DATABASE_URL environment variable.")
+        raise RuntimeError(
+            "Database not configured. Set DATABASE_URL environment variable."
+        )
 
     async with session_factory() as session:
         try:

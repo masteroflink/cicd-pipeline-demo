@@ -100,8 +100,18 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
 
-      - name: Terraform Apply
+      - name: Terraform Plan (on push)
+        id: plan-push
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform plan -no-color -input=false
+        working-directory: terraform
+        env:
+          TF_VAR_owner_id: ${{ secrets.RENDER_OWNER_ID }}
+          TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
+
+      # Apply only on manual workflow dispatch (requires billing on Render)
+      - name: Terraform Apply
+        if: github.event_name == 'workflow_dispatch'
         run: terraform apply -auto-approve -input=false
         working-directory: terraform
         env:

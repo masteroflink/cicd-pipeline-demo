@@ -6,7 +6,10 @@
 resource "render_web_service" "api" {
   name   = var.service_name
   region = var.region
-  plan   = "free"
+  # Note: Free tier services cannot be created via Terraform API.
+  # Use "starter" or higher for Terraform-managed services.
+  # For portfolio purposes, this demonstrates the IaC pattern.
+  plan = "starter"
 
   runtime_source = {
     docker = {
