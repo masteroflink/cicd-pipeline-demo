@@ -16,7 +16,6 @@ from sqlalchemy.ext.asyncio import (
 from app.db.database import Base, get_db
 from app.main import app
 
-
 # Create a temporary file for SQLite database
 _db_fd, _db_path = tempfile.mkstemp(suffix=".db")
 
