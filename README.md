@@ -122,6 +122,7 @@ curl http://localhost:8000/health
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/health` | Health check with status, version, timestamp |
+| GET | `/metrics` | Prometheus metrics endpoint |
 | GET | `/api/v1/items` | List all items |
 | POST | `/api/v1/items` | Create a new item |
 | GET | `/api/v1/items/{id}` | Get item by ID |
@@ -152,24 +153,6 @@ curl -X POST http://localhost:8000/api/v1/calculate \
 - Python 3.11+ (for local development without Docker)
 - Make (optional, for convenience commands)
 
-### Project Structure
-
-```
-cicd-pipeline-demo/
-├── .github/workflows/     # GitHub Actions workflows
-│   ├── ci.yml            # CI pipeline (lint, test, build)
-│   ├── cd.yml            # CD pipeline (deploy to staging)
-│   └── release.yml       # Release workflow (tag-triggered)
-├── src/app/              # Application source code
-│   ├── api/              # API endpoints
-│   ├── models/           # Pydantic models
-│   └── services/         # Business logic
-├── tests/                # Test suite
-├── docker/               # Dockerfiles
-├── scripts/              # Deployment scripts
-└── Makefile              # Development commands
-```
-
 ### Running Tests
 
 ```bash
@@ -193,16 +176,37 @@ make lint
 make format
 ```
 
+### Pre-commit Hooks
+
+```bash
+# Install pre-commit
+pip install pre-commit
+
+# Set up hooks (runs automatically on git commit)
+pre-commit install
+
+# Run all hooks manually
+pre-commit run --all-files
+```
+
+Hooks include: Black, Ruff, Mypy, Gitleaks (secret detection), Hadolint (Dockerfile linting), yamllint.
+
 ## CI/CD Workflows
 
 ### CI Pipeline (`.github/workflows/ci.yml`)
 
 Triggered on push/PR to `main` and `develop` branches:
 
-- **Lint**: Black, Ruff, Mypy
-- **Test**: pytest with coverage report
-- **Build**: Docker image build and push (main only)
-- **Security**: Trivy vulnerability scan (main only)
+- **Lint**: Black, Ruff, Mypy, pip-audit (dependency vulnerabilities)
+- **Test**: pytest with 80% coverage threshold
+- **Build**: Docker image build and push to ghcr.io (main only)
+- **Security**: Trivy container scan (main only)
+- **Notifications**: Slack alerts on failure
+
+### SAST Pipeline (`.github/workflows/codeql.yml`)
+
+- CodeQL static analysis for security vulnerabilities
+- Runs on push/PR and weekly schedule
 
 ### CD Pipeline (`.github/workflows/cd.yml`)
 
@@ -287,6 +291,3 @@ kubectl apply --dry-run=client -f k8s/
 helm template my-release helm/cicd-demo/
 ```
 
-## License
-
-MIT License - See [LICENSE](LICENSE) for details.
