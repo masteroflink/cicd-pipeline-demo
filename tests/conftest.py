@@ -1,45 +1,51 @@
 """Pytest configuration and shared fixtures."""
 
 import pytest
+from collections.abc import AsyncGenerator
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.db.database import Base, get_db
 from app.main import app
 
 
-# Create an in-memory SQLite database for testing
-SQLALCHEMY_DATABASE_URL = "sqlite://"
+# Create an in-memory SQLite database for testing (async)
+SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite://"
 
-engine = create_engine(
+engine = create_async_engine(
     SQLALCHEMY_DATABASE_URL,
     connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
 )
 
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+TestingSessionLocal = async_sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
 
 
-def override_get_db():
+async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
     """Override database dependency for testing."""
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    async with TestingSessionLocal() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
 
 
 @pytest.fixture(autouse=True)
-def setup_test_db():
+async def setup_test_db():
     """Create tables before each test and drop after."""
     # Import models to ensure they're registered with Base
     from app.db import models  # noqa: F401
 
-    Base.metadata.create_all(bind=engine)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
     yield
-    Base.metadata.drop_all(bind=engine)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
 
 
 @pytest.fixture
