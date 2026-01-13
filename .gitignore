@@ -67,3 +67,11 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+
+# Load test results
+tests/load/results/*.json
+!tests/load/results/.gitkeep
+
+# Monitoring data (local volumes)
+prometheus-data/
+grafana-data/

@@ -38,11 +38,11 @@ docs/
 # Tests (not needed in production image)
 tests/
 
-# Development files
+# Development files (kept for dev builds)
 docker-compose.yml
 docker-compose*.yml
 Makefile
-requirements-dev.txt
+# requirements-dev.txt - needed for Dockerfile.dev
 docker/Dockerfile.dev
 
 # CI/CD

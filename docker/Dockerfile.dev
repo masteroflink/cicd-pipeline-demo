@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
-COPY requirements-dev.txt .
+COPY requirements.txt requirements-dev.txt ./
 
 # Install all dependencies including dev tools
 RUN pip install --no-cache-dir --upgrade pip && \

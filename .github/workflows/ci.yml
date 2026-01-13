@@ -37,6 +37,9 @@ jobs:
       - name: Run Mypy
         run: mypy src --ignore-missing-imports
 
+      - name: Run pip-audit (Dependency Scanning)
+        run: pip-audit --strict --desc on
+
   test:
     name: Test
     runs-on: ubuntu-latest

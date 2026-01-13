@@ -1,15 +1,57 @@
 # CI/CD Pipeline Demo
 
-A production-ready CI/CD pipeline demonstration using GitHub Actions and Docker. This project showcases automated testing, building, and deployment of a containerized Python FastAPI application.
+A production-ready CI/CD pipeline demonstration showcasing modern DevOps practices. This project includes containerization, orchestration, monitoring, security scanning, and infrastructure as code.
+
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=flat&logo=kubernetes&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=flat&logo=prometheus&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-F46800?style=flat&logo=grafana&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=github-actions&logoColor=white)
+![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=flat&logo=terraform&logoColor=white)
+
+## DevOps Capabilities
+
+### Observability Stack
+
+Real-time monitoring with Prometheus metrics collection and Grafana dashboards.
+
+![Grafana Dashboard](assets/grafana-dashboard.png)
+
+**Features:**
+- Request rate, latency (P95), and error rate monitoring
+- Requests by endpoint, status code, and HTTP method
+- Auto-refreshing dashboards with 5-second intervals
+
+### Prometheus Metrics
+
+Application metrics automatically scraped and stored for analysis.
+
+![Prometheus Targets](assets/prometheus-targets.png)
+
+**Metrics collected:**
+- `http_requests_total` - Request counts by endpoint/status
+- `http_request_duration_seconds` - Response time histograms
+- `http_request_size_bytes` / `http_response_size_bytes` - Payload sizes
+
+### API Documentation
+
+Interactive Swagger UI for API exploration and testing.
+
+![API Documentation](assets/api-docs.png)
 
 ## Features
 
 - **FastAPI REST API** with health checks, CRUD operations, and calculator endpoints
-- **Test-Driven Development (TDD)** with 100% code coverage
+- **Observability** with Prometheus metrics and Grafana dashboards
+- **Container Orchestration** with Kubernetes manifests and Helm charts
+- **Infrastructure as Code** with Terraform (Render deployment)
 - **Multi-stage Docker builds** for optimized production images
-- **GitHub Actions CI/CD** with lint, test, build, and deploy stages
-- **Container Registry** integration with GitHub Container Registry (ghcr.io)
-- **Security scanning** with Trivy vulnerability scanner
+- **GitHub Actions CI/CD** with lint, test, build, security scan, and deploy
+- **Security scanning** with Trivy (containers) and CodeQL (SAST)
+- **Dependency scanning** with pip-audit
+- **Pre-commit hooks** for shift-left quality gates
+- **Load testing** with k6 scripts
 - **Automated releases** with semantic versioning
 
 ## Pipeline Overview
@@ -184,12 +226,66 @@ Triggered on version tags (`v*`):
 |----------|------------|
 | Language | Python 3.11 |
 | Framework | FastAPI |
-| Testing | pytest, pytest-cov |
-| Linting | Black, Ruff, Mypy |
+| Testing | pytest, pytest-cov, k6 (load testing) |
+| Linting | Black, Ruff, Mypy, pre-commit |
 | Container | Docker, Docker Compose |
+| Orchestration | Kubernetes, Helm |
+| Monitoring | Prometheus, Grafana |
 | CI/CD | GitHub Actions |
 | Registry | GitHub Container Registry |
-| Security | Trivy |
+| Security | Trivy, CodeQL, pip-audit |
+| IaC | Terraform |
+
+## Project Structure
+
+```
+cicd-pipeline-demo/
+├── .github/workflows/      # CI/CD pipelines
+│   ├── ci.yml             # Lint, test, build, security scan
+│   ├── cd.yml             # Deploy to staging
+│   ├── release.yml        # Semantic versioning releases
+│   └── codeql.yml         # SAST security analysis
+├── src/app/               # Application source code
+│   ├── api/               # API endpoints
+│   ├── models/            # Pydantic schemas
+│   └── services/          # Business logic
+├── tests/                 # Test suite
+│   └── load/              # k6 load testing scripts
+├── docker/                # Dockerfiles (dev & prod)
+├── k8s/                   # Kubernetes manifests
+├── helm/cicd-demo/        # Helm chart
+├── monitoring/            # Prometheus & Grafana config
+│   ├── prometheus/        # Scrape configuration
+│   └── grafana/           # Dashboards & datasources
+├── terraform/             # Infrastructure as Code
+├── .pre-commit-config.yaml # Pre-commit hooks
+└── docker-compose.yml     # Local development stack
+```
+
+## Quick Reference
+
+```bash
+# Start everything (API + Prometheus + Grafana)
+docker compose up -d
+
+# Access services
+API:        http://localhost:8000
+Swagger:    http://localhost:8000/docs
+Prometheus: http://localhost:9090
+Grafana:    http://localhost:3000 (admin/admin)
+
+# Run tests
+docker compose run --rm api pytest tests/ -v
+
+# Run load tests (requires k6)
+k6 run tests/load/smoke.js
+
+# Validate Kubernetes manifests
+kubectl apply --dry-run=client -f k8s/
+
+# Render Helm chart
+helm template my-release helm/cicd-demo/
+```
 
 ## License
 
