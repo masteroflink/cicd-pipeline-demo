@@ -1,0 +1,14 @@
+# Example Terraform variables file
+# Copy to terraform.tfvars and fill in your values
+
+# Render owner ID (find in Render dashboard URL or API)
+owner_id = "YOUR_RENDER_OWNER_ID"
+
+# Service configuration
+service_name = "cicd-pipeline-demo"
+region       = "oregon"
+environment  = "production"
+log_level    = "INFO"
+
+# Database URL (from Supabase - set via TF_VAR_database_url environment variable for security)
+# database_url = "postgresql://..."
