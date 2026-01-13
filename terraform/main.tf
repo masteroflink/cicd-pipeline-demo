@@ -6,7 +6,7 @@
 resource "render_web_service" "api" {
   name   = var.service_name
   region = var.region
-  plan   = "starter"
+  plan   = "free"
 
   runtime_source = {
     docker = {
