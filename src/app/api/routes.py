@@ -1,9 +1,12 @@
 """API routes for items and calculator endpoints."""
 
-import uuid
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from fastapi import APIRouter, HTTPException, status
-
+from app.core.config import get_settings
+from app.db.database import get_db
+from app.db.models import Item
 from app.models.schemas import (
     CalculateRequest,
     CalculateResponse,
@@ -15,22 +18,26 @@ from app.services.calculator import add, divide, multiply, subtract
 
 router = APIRouter(prefix="/api/v1", tags=["api"])
 
-# In-memory storage for items
-items_db: dict[str, ItemResponse] = {}
-
 
 @router.get("/items", response_model=list[ItemResponse])
-def get_items() -> list[ItemResponse]:
+async def get_items(db: AsyncSession = Depends(get_db)) -> list[ItemResponse]:
     """Get all items.
 
     Returns:
         List of all items in the database.
     """
-    return list(items_db.values())
+    result = await db.execute(select(Item))
+    items = result.scalars().all()
+    return [
+        ItemResponse(id=item.id, name=item.name, description=item.description)
+        for item in items
+    ]
 
 
 @router.post("/items", response_model=ItemResponse, status_code=status.HTTP_201_CREATED)
-def create_item(item: ItemCreate) -> ItemResponse:
+async def create_item(
+    item: ItemCreate, db: AsyncSession = Depends(get_db)
+) -> ItemResponse:
     """Create a new item.
 
     Args:
@@ -39,18 +46,20 @@ def create_item(item: ItemCreate) -> ItemResponse:
     Returns:
         The created item with generated ID.
     """
-    item_id = str(uuid.uuid4())
-    item_response = ItemResponse(
-        id=item_id,
-        name=item.name,
-        description=item.description,
+    db_item = Item(name=item.name, description=item.description)
+    db.add(db_item)
+    await db.flush()
+    await db.refresh(db_item)
+
+    return ItemResponse(
+        id=db_item.id,
+        name=db_item.name,
+        description=db_item.description,
     )
-    items_db[item_id] = item_response
-    return item_response
 
 
 @router.get("/items/{item_id}", response_model=ItemResponse)
-def get_item(item_id: str) -> ItemResponse:
+async def get_item(item_id: str, db: AsyncSession = Depends(get_db)) -> ItemResponse:
     """Get a specific item by ID.
 
     Args:
@@ -62,16 +71,20 @@ def get_item(item_id: str) -> ItemResponse:
     Raises:
         HTTPException: If the item is not found.
     """
-    if item_id not in items_db:
+    result = await db.execute(select(Item).where(Item.id == item_id))
+    item = result.scalar_one_or_none()
+
+    if item is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Item with id '{item_id}' not found",
         )
-    return items_db[item_id]
+
+    return ItemResponse(id=item.id, name=item.name, description=item.description)
 
 
 @router.post("/calculate", response_model=CalculateResponse)
-def calculate(request: CalculateRequest) -> CalculateResponse:
+async def calculate(request: CalculateRequest) -> CalculateResponse:
     """Perform a calculation.
 
     Args:

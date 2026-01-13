@@ -15,6 +15,10 @@ services:
       - PYTHONPATH=/app/src
       - ENVIRONMENT=development
       - LOG_LEVEL=DEBUG
+      - DATABASE_URL=${DATABASE_URL:-}
+    env_file:
+      - path: .env
+        required: false
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
