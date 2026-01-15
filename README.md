@@ -292,3 +292,10 @@ kubectl apply --dry-run=client -f k8s/
 helm template my-release helm/cicd-demo/
 ```
 
+## Support
+
+If this project helped you, consider supporting:
+
+- **GitHub Sponsors:** https://github.com/sponsors/masteroflink
+- **Ko-fi:** https://ko-fi.com/masteroflink
+
