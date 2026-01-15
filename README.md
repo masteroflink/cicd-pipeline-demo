@@ -10,6 +10,9 @@ A production-ready CI/CD pipeline demonstration showcasing modern DevOps practic
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=github-actions&logoColor=white)
 ![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=flat&logo=terraform&logoColor=white)
 
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-EA4AAA?style=for-the-badge&logo=github-sponsors&logoColor=white)](https://github.com/sponsors/masteroflink)
+[![Ko-Fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/masteroflink)
+
 ## DevOps Capabilities
 
 ### Observability Stack
@@ -291,11 +294,4 @@ kubectl apply --dry-run=client -f k8s/
 # Render Helm chart
 helm template my-release helm/cicd-demo/
 ```
-
-## Support
-
-If this project helped you, consider supporting:
-
-- **GitHub Sponsors:** https://github.com/sponsors/masteroflink
-- **Ko-fi:** https://ko-fi.com/masteroflink
 
